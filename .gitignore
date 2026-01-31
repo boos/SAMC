@@ -185,3 +185,6 @@ fabric.properties
 # Cursor
 .cursorignore
 .cursorindexingignore
+
+# Claude Code
+.claude/
