@@ -4,10 +4,14 @@ FastAPI application factory.
 Creates and configures the FastAPI application instance.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import settings
 from app.api.v1.router import api_router
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -21,7 +25,7 @@ app = FastAPI(
 app.include_router(api_router, prefix="/api/v1")
 
 
-@app.get("/")
+@app.get("/", summary="/ endpoint for testing.")
 async def root():
     """Root endpoint - health check."""
     return {
@@ -31,18 +35,19 @@ async def root():
     }
 
 
-@app.get("/health")
+@app.get("/health", summary="Health check endpoint for monitoring.")
 async def health_check():
     """Health check endpoint for monitoring."""
     return {
-        "status": "healthyS",
+        "status": "healthy",
         "service": "samc-api",
         "version": settings.VERSION
     }
 
 
-@app.get("/info")
+@app.get("/info", summary="Info endpoint for monitoring.")
 async def info():
+    """ Project, version, authors, and project url info endpoint."""
     return {
         "project name": settings.PROJECT_NAME,
         "version": settings.VERSION,
@@ -50,13 +55,3 @@ async def info():
         "authors emails": settings.AUTHORS_EMAILS,
         "project url": settings.PROJECT_URL
     }
-
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
-
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
-
-@app.get("/items/")
-async def read_items(token: str = Depends(oauth2_scheme)):
-    return {"token": token}
