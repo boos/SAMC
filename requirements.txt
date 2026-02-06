@@ -2,6 +2,7 @@
 fastapi==0.128.0
 uvicorn[standard]==0.40.0
 python-multipart==0.0.22
+watchfiles
 
 # Database
 sqlmodel==0.0.31
@@ -15,6 +16,7 @@ passlib[bcrypt]==1.7.4
 # Validation
 pydantic==2.12.5
 pydantic-settings==2.12.0
+pydantic[email]
 
 # Environment
 python-dotenv==1.2.1

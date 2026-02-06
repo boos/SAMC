@@ -1,0 +1,1 @@
+"""Strength training plugin (MVP)."""
