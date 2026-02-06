@@ -33,18 +33,28 @@ class PhysioService:
     # Public API
     # ------------------------------------------------------------------
 
-    def create(self, user_id: int, data: PhysioEntryCreate) -> PhysioEntryResponse:
-        """Create a daily physio entry. Raises 409 if date already exists."""
-        existing = self.repository.get_by_user_and_date(user_id, data.date)
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"Physio entry already exists for {data.date}",
-            )
+    def upsert(
+        self, user_id: int, date: datetime.date, data: PhysioEntryCreate,
+    ) -> tuple[PhysioEntryResponse, bool]:
+        """Create or update a physio entry for the given date.
 
-        entry = PhysioData(user_id=user_id, **self._schema_to_flat(data))
+        Returns:
+            Tuple of (response, created) where created is True if new entry.
+        """
+        existing = self.repository.get_by_user_and_date(user_id, date)
+
+        if existing:
+            flat = self._schema_to_flat(data)
+            for key, value in flat.items():
+                if value is not None:
+                    setattr(existing, key, value)
+            existing.updated_at = datetime.datetime.utcnow()
+            entry = self.repository.update(existing)
+            return self._to_response(entry), False
+
+        entry = PhysioData(user_id=user_id, date=date, **self._schema_to_flat(data))
         entry = self.repository.create(entry)
-        return self._to_response(entry)
+        return self._to_response(entry), True
 
     def get_by_id(self, user_id: int, entry_id: int) -> PhysioEntryResponse:
         entry = self._get_owned_entry(user_id, entry_id)
@@ -90,6 +100,15 @@ class PhysioService:
     def delete(self, user_id: int, entry_id: int) -> None:
         self._get_owned_entry(user_id, entry_id)
         self.repository.delete(entry_id)
+
+    def delete_by_date(self, user_id: int, date: datetime.date) -> None:
+        entry = self.repository.get_by_user_and_date(user_id, date)
+        if not entry:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No physio entry for {date}",
+            )
+        self.repository.delete(entry.id)
 
     # ------------------------------------------------------------------
     # Helpers
