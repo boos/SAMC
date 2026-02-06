@@ -6,21 +6,14 @@ Handles mapping between nested API schemas and flat database model.
 """
 
 import datetime
-from typing import Optional
 
 from fastapi import HTTPException, status
 from sqlmodel import Session
 
 from app.db.repositories.physio import PhysioRepository
 from app.models.physio import PhysioData
-from app.schemas.physio import (
-    HRVData,
-    HeartRateData,
-    PhysioEntryCreate,
-    PhysioEntryResponse,
-    PhysioEntryUpdate,
-    SleepData,
-)
+from app.schemas.physio import (HRVData, HeartRateData, PhysioEntryCreate, PhysioEntryResponse, PhysioEntryUpdate,
+                                SleepData, )
 
 
 class PhysioService:
@@ -33,9 +26,7 @@ class PhysioService:
     # Public API
     # ------------------------------------------------------------------
 
-    def upsert(
-        self, user_id: int, date: datetime.date, data: PhysioEntryCreate,
-    ) -> tuple[PhysioEntryResponse, bool]:
+    def upsert(self, user_id: int, date: datetime.date, data: PhysioEntryCreate, ) -> tuple[PhysioEntryResponse, bool]:
         """Create or update a physio entry for the given date.
 
         Returns:
@@ -63,15 +54,10 @@ class PhysioService:
     def get_by_date(self, user_id: int, date: datetime.date) -> PhysioEntryResponse:
         entry = self.repository.get_by_user_and_date(user_id, date)
         if not entry:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No physio entry for {date}",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No physio entry for {date}", )
         return self._to_response(entry)
 
-    def get_range(
-        self, user_id: int, start: datetime.date, end: datetime.date,
-    ) -> list[PhysioEntryResponse]:
+    def get_range(self, user_id: int, start: datetime.date, end: datetime.date, ) -> list[PhysioEntryResponse]:
         entries = self.repository.get_by_user_date_range(user_id, start, end)
         return [self._to_response(e) for e in entries]
 
@@ -79,15 +65,11 @@ class PhysioService:
         entries = self.repository.get_latest_by_user(user_id, limit)
         return [self._to_response(e) for e in entries]
 
-    def get_all(
-        self, user_id: int, skip: int = 0, limit: int = 100,
-    ) -> list[PhysioEntryResponse]:
+    def get_all(self, user_id: int, skip: int = 0, limit: int = 100, ) -> list[PhysioEntryResponse]:
         entries = self.repository.get_all_by_user(user_id, skip, limit)
         return [self._to_response(e) for e in entries]
 
-    def update(
-        self, user_id: int, entry_id: int, data: PhysioEntryUpdate,
-    ) -> PhysioEntryResponse:
+    def update(self, user_id: int, entry_id: int, data: PhysioEntryUpdate, ) -> PhysioEntryResponse:
         entry = self._get_owned_entry(user_id, entry_id)
         flat = self._schema_to_flat(data)
         for key, value in flat.items():
@@ -104,10 +86,7 @@ class PhysioService:
     def delete_by_date(self, user_id: int, date: datetime.date) -> None:
         entry = self.repository.get_by_user_and_date(user_id, date)
         if not entry:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No physio entry for {date}",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No physio entry for {date}", )
         self.repository.delete(entry.id)
 
     # ------------------------------------------------------------------
@@ -118,16 +97,13 @@ class PhysioService:
         """Get entry by id and verify ownership."""
         entry = self.repository.get_by_id(entry_id)
         if not entry or entry.user_id != user_id:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Physio entry not found",
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Physio entry not found", )
         return entry
 
     @staticmethod
     def _schema_to_flat(data: PhysioEntryCreate | PhysioEntryUpdate) -> dict:
         """Convert nested schema to flat dict for the database model."""
-        flat: dict = {"date": data.date}
+        flat: dict = { }
 
         if data.hrv:
             flat["hrv_rmssd"] = data.hrv.rmssd
@@ -159,33 +135,16 @@ class PhysioService:
 
         heart_rate = None
         if entry.rhr_morning is not None:
-            heart_rate = HeartRateData(
-                rhr_morning=entry.rhr_morning,
-                rhr_night_avg=entry.rhr_night_avg,
-                rhr_night_nadir=entry.rhr_night_nadir,
-            )
+            heart_rate = HeartRateData(rhr_morning=entry.rhr_morning, rhr_night_avg=entry.rhr_night_avg,
+                                       rhr_night_nadir=entry.rhr_night_nadir, )
 
         sleep = None
         if entry.sleep_duration_min is not None:
-            sleep = SleepData(
-                sleep_duration_min=entry.sleep_duration_min,
-                deep_sleep_min=entry.deep_sleep_min,
-                rem_sleep_min=entry.rem_sleep_min,
-                light_sleep_min=entry.light_sleep_min,
-                waso_min=entry.waso_min,
-                sleep_onset_time=entry.sleep_onset_time,
-                wake_time=entry.wake_time,
-                awakenings_count=entry.awakenings_count,
-                sleep_onset_latency_min=entry.sleep_onset_latency_min,
-            )
+            sleep = SleepData(sleep_duration_min=entry.sleep_duration_min, deep_sleep_min=entry.deep_sleep_min,
+                              rem_sleep_min=entry.rem_sleep_min, light_sleep_min=entry.light_sleep_min,
+                              waso_min=entry.waso_min, sleep_onset_time=entry.sleep_onset_time,
+                              wake_time=entry.wake_time, awakenings_count=entry.awakenings_count,
+                              sleep_onset_latency_min=entry.sleep_onset_latency_min, )
 
-        return PhysioEntryResponse(
-            id=entry.id,
-            user_id=entry.user_id,
-            date=entry.date,
-            hrv=hrv,
-            heart_rate=heart_rate,
-            sleep=sleep,
-            created_at=entry.created_at,
-            updated_at=entry.updated_at,
-        )
+        return PhysioEntryResponse(id=entry.id, user_id=entry.user_id, date=entry.date, hrv=hrv, heart_rate=heart_rate,
+                                   sleep=sleep, created_at=entry.created_at, updated_at=entry.updated_at, )

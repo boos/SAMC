@@ -57,7 +57,6 @@ class SleepData(BaseModel):
 class PhysioEntryBase(BaseModel):
     """Base physiological entry schema with common fields."""
 
-    date: datetime.date = Field(..., description="Calendar date this entry belongs to (YYYY-MM-DD)", )
     hrv: Optional[HRVData] = Field(None, description="Heart rate variability data", )
     heart_rate: Optional[HeartRateData] = Field(None, description="Resting heart rate data", )
     sleep: Optional[SleepData] = Field(None, description="Sleep metrics data", )
@@ -72,7 +71,6 @@ class PhysioEntryCreate(PhysioEntryBase):
 class PhysioEntryUpdate(BaseModel):
     """Schema for updating a physiological entry (all fields optional)."""
 
-    date: Optional[datetime.date] = Field(None, description="Calendar date this entry belongs to (YYYY-MM-DD)", )
     hrv: Optional[HRVData] = Field(None, description="Heart rate variability data", )
     heart_rate: Optional[HeartRateData] = Field(None, description="Resting heart rate data", )
     sleep: Optional[SleepData] = Field(None, description="Sleep metrics data", )
@@ -83,6 +81,7 @@ class PhysioEntryResponse(PhysioEntryBase):
     """Schema for physiological entry data in API responses."""
 
     id: int
+    date: datetime.date
     user_id: int
     created_at: datetime.datetime
     updated_at: datetime.datetime
