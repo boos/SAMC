@@ -10,7 +10,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query, Response, status
 from sqlmodel import Session
 
-from app.api.deps import get_current_user
+from app.api.dependencies import get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.physio import PhysioEntryCreate, PhysioEntryResponse
