@@ -13,6 +13,8 @@ from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
+print("project_root: ", project_root)
+
 sys.path.insert(0, str(project_root))
 
 from app.db.init_db import init_db
