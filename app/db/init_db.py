@@ -24,7 +24,7 @@ def init_db() -> None:
 
     # Import all models so SQLModel.metadata has them
     from app.models.user import User  # noqa: F401
-    # Week 2: from app.models.physio_data import PhysioData
+    from app.models.physio import PhysioData  # noqa: F401
     # Week 3: from app.models.training_session import TrainingSession
     # Week 4: from app.models.daily_state import DailyState
 
