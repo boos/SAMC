@@ -3,25 +3,21 @@ Authentication endpoints.
 
 Handles user registration and login.
 """
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
-
 from sqlmodel import Session
 
-from app.core.security import decode_access_token
+from app.core.security import decode_access_token, oauth2_scheme
 from app.db.session import get_db
-from app.schemas.user import Token, UserCreate, UserLogin, UserResponse
+from app.schemas.token import Token
+from app.schemas.user import UserCreate, UserLogin, UserResponse
 from app.services.user_service import UserService
-from app.core.security import oauth2_scheme
 
 router = APIRouter()
 
 
-@router.post("/register",
-             summary="User registration endpoint.",
-             response_model=UserResponse,
+@router.post("/register", summary="User registration endpoint.", response_model=UserResponse,
              status_code=status.HTTP_201_CREATED)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
     """
@@ -42,11 +38,8 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     return user
 
 
-@router.post("/login",
-             summary="User login endpoint via OAuth2 form (for Swagger UI).",
-             response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
-):
+@router.post("/login", summary="User login endpoint via OAuth2 form (for Swagger UI).", response_model=Token)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """
     Authenticate user via OAuth2 form (for Swagger UI).
 
@@ -58,11 +51,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return token
 
 
-@router.post("/token",
-             summary="User login endpoint via Json.",
-             response_model=Token)
-def login_json(login_data: UserLogin, db: Session = Depends(get_db)
-):
+@router.post("/token", summary="User login endpoint via Json.", response_model=Token)
+def login_json(login_data: UserLogin, db: Session = Depends(get_db)):
     """
     Authenticate user via JSON body.
 
@@ -78,9 +68,7 @@ def login_json(login_data: UserLogin, db: Session = Depends(get_db)
     return token
 
 
-@router.get("/me",
-            summary="User info endpoint.",
-            response_model=UserResponse)
+@router.get("/me", summary="User info endpoint.", response_model=UserResponse)
 def me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     user = decode_access_token(token)
     service = UserService(db)

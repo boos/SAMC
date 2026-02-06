@@ -14,13 +14,13 @@ from pydantic import BaseModel, EmailStr, Field
 class UserBase(BaseModel):
     """Base user schema with common fields."""
     email: EmailStr
-    full_name: Optional[str] = None
+    full_name: Optional[str]
 
 
 # Request schemas
 class UserCreate(UserBase):
     """Schema for user registration."""
-    password: str = Field(..., min_length=8, description="Password (min 8 characters)")
+    password: str = Field("Password", min_length=8, description="Password (min 8 characters)")
 
 
 class UserLogin(BaseModel):
@@ -31,9 +31,9 @@ class UserLogin(BaseModel):
 
 class UserUpdate(BaseModel):
     """Schema for updating user profile."""
-    email: Optional[EmailStr] = None
-    full_name: Optional[str] = None
-    password: Optional[str] = Field(None, min_length=8)
+    email: Optional[EmailStr]
+    full_name: Optional[str]
+    password: Optional[str] = Field(None, min_length=8, description="Password (min 8 characters)")
 
 
 # Response schemas
@@ -47,15 +47,3 @@ class UserResponse(UserBase):
 
     class Config:
         from_attributes = True  # Allows creation from SQLModel objects
-
-
-# Token schemas
-class Token(BaseModel):
-    """Schema for JWT token response."""
-    access_token: str
-    token_type: str = "bearer"
-
-
-class TokenData(BaseModel):
-    """Schema for decoded token data."""
-    email: Optional[str] = None
