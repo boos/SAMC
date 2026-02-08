@@ -20,19 +20,7 @@ app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION,
 app.include_router(api_router, prefix="/api/v1")
 
 
-@app.get("/", summary="/ endpoint for testing.")
-async def root():
-    """Root endpoint - health check."""
-    return { "message": "SAMC API", "version": settings.VERSION, "status": "healthy" }
-
-
-@app.get("/health", summary="Health check endpoint for monitoring.")
-async def health_check():
-    """Health check endpoint for monitoring."""
-    return { "status": "healthy", "service": "samc-api", "version": settings.VERSION }
-
-
-@app.get("/info", summary="Info endpoint for monitoring.")
+@app.get("/", summary="Info endpoint for monitoring.")
 async def info():
     """ Project, version, authors, and project url info endpoint."""
     return { "project name": settings.PROJECT_NAME, "version": settings.VERSION, "authors": settings.AUTHORS,

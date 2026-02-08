@@ -11,21 +11,17 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-# ---------------------------------------------------------------------------
-# Nested value-object schemas (embedded data groups)
-# ---------------------------------------------------------------------------
-
 class HRVData(BaseModel):
     """HRV (Heart Rate Variability) metrics."""
 
-    rmssd: float = Field(..., ge=1.0, le=300.0,
-                         description="Root mean square of successive RR interval differences (ms)", )
+    rmssd: Optional[float] = Field(None, ge=1.0, le=300.0,
+                                   description="Root mean square of successive RR interval differences (ms)", )
 
 
 class HeartRateData(BaseModel):
     """Resting heart rate metrics."""
 
-    rhr_morning: Optional[int] = Field(..., ge=25, le=120, description="Morning resting heart rate at waking (bpm)", )
+    rhr_morning: Optional[int] = Field(None, ge=25, le=120, description="Morning resting heart rate at waking (bpm)")
     rhr_night_avg: Optional[int] = Field(None, ge=25, le=120,
                                          description="Average resting heart rate during night (bpm)", )
     rhr_night_nadir: Optional[int] = Field(None, ge=20, le=100,
@@ -35,7 +31,7 @@ class HeartRateData(BaseModel):
 class SleepData(BaseModel):
     """Sleep metrics."""
 
-    sleep_duration_min: Optional[int] = Field(..., ge=0, le=1440,
+    sleep_duration_min: Optional[int] = Field(None, ge=0, le=1440,
                                               description="Total effective sleep duration (minutes)", )
     deep_sleep_min: Optional[int] = Field(None, ge=0, le=600, description="Time in deep sleep (minutes)", )
     rem_sleep_min: Optional[int] = Field(None, ge=0, le=600, description="Time in REM sleep (minutes)", )
@@ -48,10 +44,6 @@ class SleepData(BaseModel):
     sleep_onset_latency_min: Optional[int] = Field(None, ge=0, le=300,
                                                    description="Time to fall asleep after lights out (minutes)", )
 
-
-# ---------------------------------------------------------------------------
-# Entity schemas (Base / Create / Update / Response)
-# ---------------------------------------------------------------------------
 
 # Shared properties
 class PhysioEntryBase(BaseModel):
@@ -81,10 +73,11 @@ class PhysioEntryResponse(PhysioEntryBase):
     """Schema for physiological entry data in API responses."""
 
     id: int
-    date: datetime.date
     user_id: int
     created_at: datetime.datetime
     updated_at: datetime.datetime
+    
+    date: datetime.date
 
     class Config:
         from_attributes = True

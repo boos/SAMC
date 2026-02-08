@@ -47,6 +47,15 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
+    @property
+    def DATABASE_URL(self) -> str:
+        """Construct PostgreSQL connection string from components."""
+        return (
+            f"postgresql://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
+            f"@{self.DATABASE_HOST}:{self.DATABASE_PORT}"
+            f"/{self.DATABASE_DBNAME}"
+        )
+
 
 # Global settings instance
 settings = Settings()

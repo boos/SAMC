@@ -8,7 +8,6 @@ from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 
-from app.core.security import decode_access_token, oauth2_scheme
 from app.db.session import get_db
 from app.schemas.token import Token
 from app.schemas.user import UserCreate, UserLogin, UserResponse
@@ -66,10 +65,3 @@ def login_json(login_data: UserLogin, db: Session = Depends(get_db)):
     service = UserService(db)
     token = service.authenticate(login_data)
     return token
-
-
-@router.get("/me", summary="User info endpoint.", response_model=UserResponse)
-def me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    user = decode_access_token(token)
-    service = UserService(db)
-    return service.get_user_by_email(user)
